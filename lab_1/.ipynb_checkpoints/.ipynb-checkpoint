@@ -1,0 +1,794 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Quantitative Biology and Biophysics (AS.020.674/250.644)\tSpring 2020\n",
+    "## Gordus Lab \n",
+    "## February 4, 2021\n",
+    "\n",
+    "\n",
+    "## Due: Monday February 8, 2021, 11:59 PM\n",
+    "\n",
+    "# Problem 1a: Data distributions\n",
+    "\n",
+    "You are going to work with single and double ¬Gaussian data from Viets, et. al (2019). You have been provided with data in the form of an excel file.\n",
+    "\n",
+    "You will find many of the cells already have code I have written for you. Execute these cells. Any cells that are empty are cells where you need to add code.\n",
+    "\n",
+    "We want to explore these data, to do this we will first plot this data in a variety of ways using seaborn.\n",
+    "\n",
+    "Please follow these steps:\n",
+    "\n",
+    "1. Use pandas to read in data from the excel file.\n",
+    "2. Use seaborn to plot the data using the following tools:\n",
+    "\n",
+    "    a.\tProduce a swarm plot of the data\n",
+    "    \n",
+    "    b.\tProduce a violin plot of the data\n",
+    "    \n",
+    "    c.\tProduce a box plot of the data\n",
+    "    \n",
+    "    d.\tProduce a bar plot of the data\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# These are the libraries you will need for this problem\n",
+    "\n",
+    "import pandas as pd\n",
+    "import matplotlib.pyplot as plt\n",
+    "import seaborn as sns\n",
+    "import numpy as np\n",
+    "from scipy.optimize import minimize\n",
+    "from scipy.stats import norm\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "\n",
+    "# Student Input Cell:\n",
+    "  "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>pair distance</th>\n",
+       "      <th>Sample</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>1.300000</td>\n",
+       "      <td>control</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>0.447214</td>\n",
+       "      <td>control</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>1.100000</td>\n",
+       "      <td>control</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>1.800000</td>\n",
+       "      <td>control</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>1.811077</td>\n",
+       "      <td>control</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>...</th>\n",
+       "      <td>...</td>\n",
+       "      <td>...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1795</th>\n",
+       "      <td>0.806226</td>\n",
+       "      <td>Q</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1796</th>\n",
+       "      <td>1.216553</td>\n",
+       "      <td>Q</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1797</th>\n",
+       "      <td>1.100000</td>\n",
+       "      <td>Q</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1798</th>\n",
+       "      <td>0.600000</td>\n",
+       "      <td>Q</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1799</th>\n",
+       "      <td>1.523155</td>\n",
+       "      <td>Q</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "<p>1800 rows × 2 columns</p>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "      pair distance   Sample\n",
+       "0          1.300000  control\n",
+       "1          0.447214  control\n",
+       "2          1.100000  control\n",
+       "3          1.800000  control\n",
+       "4          1.811077  control\n",
+       "...             ...      ...\n",
+       "1795       0.806226        Q\n",
+       "1796       1.216553        Q\n",
+       "1797       1.100000        Q\n",
+       "1798       0.600000        Q\n",
+       "1799       1.523155        Q\n",
+       "\n",
+       "[1800 rows x 2 columns]"
+      ]
+     },
+     "execution_count": 5,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# Import Data, and name the dataframe data_df\n",
+    "\n",
+    "data_df = pd.read_excel(\"bob_pairing_data.xlsx\")\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Student Input Cell:\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Set up the matplotlib figure\n",
+    "fig, ax = plt.subplots(figsize=(10,10))\n",
+    "ax.boxplot(ax=ax,x=\"Sample\",y=\"pair distance\",data=data_df)\n",
+    "ax.swarmplot(ax=ax,x=\"Tissue\",y=\"Transcript Density\",data=exc154_data,hue=\"Genotype\",order=[\"Antenna\",\"Early Pulse\"],hue_order=[\"WT\",\"Exc154 homozygous\",\"Exc154 hemizygous\"],dodge=True,palette=\"dark\")\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Problem 1b: Fitting distributions\n",
+    "\n",
+    "Some of the samples appear to produce a Gaussian distribution, while others seem to be the result of two Gaussians. Which distribution is more likely for each dataset? We need to do the following:\n",
+    "\n",
+    "1. Calculate the mean and standard deviation.\n",
+    "2. Use these parameters to produce a Gaussian distribution with the data.\n",
+    "3. Use this function to define the log-likelihood of this function.\n",
+    "4. Use the maximum likeklihood function to calculate the best parameters for a double-Gaussian.\n",
+    "5. Use these parameters to define the log-likelihood for each sample.\n",
+    "6. Use these log-likelihoods in the Bayesian Information Criterion to decide which distribution is most likely.\n",
+    "\n",
+    "I normally like to work in the realm of arrays, rather than DataFrames. This is because I like to leverage the power and speed of executing linear algebra functions instead of FOR loops. These functions are pre-compiled, so they are much faster. Iteratively going through arrays or DataFrames is computationally exhaustive, and take a long time to run when using large arrays of data.\n",
+    "\n",
+    "So, first I make a numpy array where the rows are observations, and columns are samples."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 31,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#convert dataframe to numpy array\n",
+    "data_n = data_df.to_numpy()\n",
+    "data_n = pd.to_numeric(data_n[:,0])\n",
+    "data_n.resize(18,100)\n",
+    "data_n = np.transpose(data_n)\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Gaussian Distribution:\n",
+    "\n",
+    "Next, I can compute the mean and standard deviation for every sample with one command, by setting the axis = 0."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 32,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "mu = np.nanmean(data_n, axis = 0)\n",
+    "sigma = np.nanstd(data_n, axis = 0)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Isn't that great? I avoided a FOR loop by using an array, and telling the function which axis to use. Both mu and sigma have 18 entries, because I calculated the mean for each column (down the rows, or axis = 0). If I had chosen axis=1, mu and sigma would be 100 elements long, because I would have calculated the mean and standard deviation of each row.\n",
+    "\n",
+    "Next, I create a function that creates the Gaussian distribution, and also the log-likelihood for a Gaussian."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 33,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def gauss_fun(x,mu,sigma):\n",
+    "    # x is a matrix, mu and sigma are vectors\n",
+    "    \n",
+    "    amp = np.power(2*np.pi*np.power(sigma,2),0.5)\n",
+    "    return np.exp(-np.power(x - mu, 2.) / (2 * np.power(sigma, 2.))) / amp\n",
+    "\n",
+    "\n",
+    "# Gaussian logL\n",
+    "    \n",
+    "def gausslogl(x, mu, sigma):\n",
+    "    # x is a matrix, mu and sigma are vectors\n",
+    "    \n",
+    "    p = gauss_fun(x,mu,sigma)\n",
+    "    return np.nansum(np.log(p), axis = 0)\n",
+    "\n",
+    "\n",
+    "# Log-likelihood of each sample\n",
+    "\n",
+    "logL1 = gausslogl(data_n, mu, sigma)\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Since Gaussian distributions are so common in scientific work, the scipy library has a norm function that can perform all sorts of useful operations, including the above calculations. You can compare the results below and see that the code above matches what you would get from these functions. However, scipy doesn't have all the distributions possible in the world, so knowing how to code this for yourself is useful."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Double-Gaussian log-likelihood:\n",
+    "\n",
+    "The double Gaussian log-likelihood function is simply the log of the sum of two Gaussians.\n",
+    "\n",
+    "NOTE: I output the NEGATIVE of a log-likelihood with this function. Why I do this is explained below.\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 34,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Double Gaussian log likelihood function\n",
+    "\n",
+    "def dgausslogl(params,x):\n",
+    "    \n",
+    "    mu1 = params[0]\n",
+    "    mu2 = params[1]\n",
+    "    sigma1 = params[2]\n",
+    "    sigma2 = params[3]\n",
+    "    w = params[4]\n",
+    "    \n",
+    "    gauss1 = gauss_fun(x,mu1,sigma1)\n",
+    "    gauss2 = gauss_fun(x,mu2,sigma2)\n",
+    "    \n",
+    "    p = w*gauss1 + (1-w)*gauss2\n",
+    "    \n",
+    "    return -np.nansum(np.log(p))\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Next up is using the log likelihood function for the double Gaussian to identify the best parameters to use for each sample. To do this, we will use a non-linear optimizer from scipy called \"minimize\". It is a recursive algorithm that takes as input a function and parameters, and changes the parameters until the function reaches a minimum. The input function we will use is the double Gaussian log-likelihood function which is simply the log of the sum of two Gaussians.\n",
+    "\n",
+    "A KEY point here is that we want to MAXIMIZE the likelihood function, but we are using a MINIMIZE function, so the function below returns the NEGATIVE of the log-likelihood so that the minimum of this is actually the maximum for the log likelihood function.\n",
+    "\n",
+    "After I use the maximize the negative of the log-likelihood function to find the best parameters of a double Gaussian for each sample, I then save the log-likelihood of the double Gaussian for each sample.\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 26,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "logL2 = np.zeros(np.shape(logL1))\n",
+    "\n",
+    "params_double = np.zeros((5,18))\n",
+    "\n",
+    "for m in (range(len(mu))):\n",
+    "    params0 = [mu[m] - sigma[m], mu[m] + sigma[m], sigma[m], sigma[m], 0.6]\n",
+    "    result = minimize(dgausslogl, params0, args=data_n[:,m], method='Nelder-Mead')\n",
+    "    params_double[:,m] = result.x\n",
+    "    logL2[m] = -dgausslogl(result.x,data_n[:,m])\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Now that we've calculated the log likelihood functions for both the single and double Gaussian distributions, we're ready to calculate the BIC! Remember, the model that produces the LOWEST BIC is the one that is most likely, RELATIVE to the other models it is compared to.\n",
+    "\n",
+    "In the cell below, use the BIC function from Lecture 1 to calculate which distribution is most likely for each sample.\n",
+    "\n",
+    "# Student Input Cell"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# BIC: Best model has LOWEST BIC\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "\n",
+    "# Problem 2: Solving ODE functions\n",
+    "\n",
+    "We’re going to analyze a simple compartment model used in epidemiology, the SIR (Susceptible, Infected, Recovered) model. It is a set of couple ordinary differential equations (ODEs) that describe the spread of an infectious disease through a population. This forms the basis for many other, more complicated models you may have seen discussed in the news. In many ways, it is very similar to the types of equations used to model chemical dynamics. For example, to create a new infected person, an infected person must come into contact with a susceptible person, therefore the kinetic term is the product of these two popualtions, just like an enzyme coming into contact with its substrate. \n",
+    "\n",
+    "Below is a flow diagram for disease progression:\n",
+    "\n",
+    " \n",
+    "\n",
+    "The ordinary differential equations (ODEs) are:\n",
+    "\n",
+    "dS/dt= -βSI\n",
+    "\n",
+    "dI/dt= βSI- γI\n",
+    "\n",
+    "dR/dt=(1-f)γI\n",
+    "\n",
+    "dD/dt=fγI\n",
+    "\n",
+    "\n",
+    "Where:\n",
+    "\n",
+    "S = Susceptible population\n",
+    "\n",
+    "I = Infected population\n",
+    "\n",
+    "R = Recovered population\n",
+    "\n",
+    "β = disease transmission rate\n",
+    "\n",
+    "γ = recovery rate\n",
+    "\n",
+    "f = fraction of infected that die\n",
+    "\n",
+    "<div>\n",
+    "<img src=\"SIR1.png\" width=\"500\"/>\n",
+    "</div>"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "ODE Solver you will need:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 18,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from scipy.integrate import solve_ivp\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The SIR function:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 19,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# SIR ODE, returns the following:\n",
+    "#\n",
+    "# dS/dt\n",
+    "# dI/dt\n",
+    "# dR/dt\n",
+    "# dD/dt\n",
+    "\n",
+    "def SIR(t,y):\n",
+    "    return np.array([-beta*y[0]*y[1], beta*y[0]*y[1] - gamma*y[1], (1-f)*gamma*y[1],\n",
+    "             f*gamma*y[1]])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "For this problem, we are going to model the progression of COVID in NYC, using parameters and population numbers gathered from public data during the time when the shelter in place order was put in place. For these calculations, to make things a little easier, we are normalizing all population numbers by the total population of NYC. When COVID first spread through the city, it grew with exponential growth, because:\n",
+    "\n",
+    "dI/dt= βSI\n",
+    "\n",
+    "At day t=0, there were 30 confirmed COVID cases. By day 12, there were 17,644 confirmed cases in the city. At this point, the city instituted a lockdown order, with the hopes of ebbing the spread of the disease. By day 52, the number of confirmed cases had risen to 167,000. The question here is did the lockdown order have an effect? What would the numbers had been like without any intervention?\n",
+    "\n",
+    "Below are the parameters for the model based on observed rates of transmission and city statistics:\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 20,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Set Variables\n",
+    "# NOTE: Timescale is days\n",
+    "\n",
+    "S0 = 1 # Actual NYC population: 8*np.power(10,6)\n",
+    "I0 = 30 / (8*np.power(10,6))\n",
+    "\n",
+    "R0 = 2.2\n",
+    "gamma = 0.44\n",
+    "beta = R0*gamma/S0\n",
+    "\n",
+    "# Current NYC Stats\n",
+    "\n",
+    "Conf = 167000 #52 days from t0\n",
+    "Dead = 13000 #52 days from t0\n",
+    "Rec = 40000 #52 days from t0\n",
+    "\n",
+    "# Shelter in Place occurred t = 12 days\n",
+    "# Confirmed cases was ~17644 at this point\n",
+    "\n",
+    "f = Dead/Conf"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "As I mentioned in lecture, linear systems of ODEs, where you can describe the system in matrix format, have analytical solutions, so you can calculate the time dependent states as functions of time, i.e. you can calculate S(t), I(t), R(t) & D(t) based on knowing dS/dt, dI/dt, etc.\n",
+    "\n",
+    "The challenge is that you often want to know the time-dependent versions of states, but rates are often easier to observe. This is not only true in epidemiology, but also in chemistry and physics. It's often easier to calculate rates.\n",
+    "\n",
+    "Unfortunately, many (most) ODE models that describe the real world are not linear, so you have to solve them numerically. One useful tool for analyzing them is using a quiver plot, where you plot the velocities, or \"flows\" of each variable under different conditions. Here is a diagram of a flow diagram:\n",
+    "\n",
+    "\n",
+    "<div>\n",
+    "<img src=\"quiver2.png\" width=\"500\"/>\n",
+    "</div>\n",
+    "\n",
+    "<div>\n",
+    "<img src=\"quiver.png\" width=\"500\"/>\n",
+    "</div>\n",
+    "\n",
+    "\n",
+    "\n",
+    "You can plot this by first defining a span of variables you want to analyze."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 21,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# PHASE PLANE\n",
+    "\n",
+    "Sspan = np.linspace(0,S0,10)\n",
+    "Ispan = np.linspace(0,S0,10)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Next, you make a meshgrid for these, which basically creates a matrix of coordinates that you are going to peg values to."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 22,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Grid of x & y values\n",
+    "S, I = np.meshgrid(Sspan, Ispan)\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Next, for each of these coordinates, you want to calculate the rates/velocities for each variable at each point in the meshgrid.\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 23,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Empty matrices to fill in with velocity data\n",
+    "dS = np.zeros(np.shape(S))\n",
+    "dI = np.zeros(np.shape(I))\n",
+    "\n",
+    "# Fill velocities into grid.\n",
+    "for m in range(S.shape[0]):\n",
+    "    for n in range(I.shape[0]):\n",
+    "        dS[m,n] = -beta*S[m,n]*I[m,n]\n",
+    "        dI[m,n] = beta*S[m,n]*I[m,n] - gamma*I[m,n]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "It is also useful to plot the nullclines, which are paths in state space where velocities are zero. You can calculate these by setting the above ODEs to zero, and solving for the variables."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 24,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Null Clines\n",
+    "\n",
+    "Sn = gamma/beta\n",
+    "In = 0"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The beta term is a rate constant that captures the probability of an infected person infecting a susceptible person. Masks decrease this rate of transmission, i.e. they decrease beta.\n",
+    "\n",
+    "In the cell below, I give some example code for how to plot a flow diagram using the \"quiver\" function from matplotlib. Copy and paste the code above that creates the grid of velocities, and plot flow diagrams with beta values that are 0.5 * beta, 0.25 * beta, and 0.1 * beta. Make sure to plot the null cline as well. How does the flow change?\n",
+    "\n",
+    "# Student Input Cell"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 25,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Text(0, 0.5, 'I')"
+      ]
+     },
+     "execution_count": 25,
+     "metadata": {},
+     "output_type": "execute_result"
+    },
+    {
+     "data": {
+      "image/png": "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1wt4rTh58qR+//33V6xPmyguXryo48eP1woVKiiguXLl0s6dO+vgwYP1u+++00OHDmVaVmo527dv10GDBuntt9+ut956q/bt21eXL1/uU4Jdu3atPvXUU1qiRAnt3bu3bt261XFsah2eeOIJLVeunA4bNsznoUB+/PFHbdiwoTZv3lzXrFnjdVtLFCanskShqjt37tQ9e/b48/rp2bNnddu2bT7HJSYmakpKii5cuNCnuPj4eB0xYoTu379fBw0a5HV8qiNHjujo0aO1VatWGhERobVq1dKnn35au3fvrn//+991+vTpGZ6jSExM1DFjxugDDzygs2bN0rffflv/9re/aZUqVbRYsWLaqVMnn+odFxenn3zyiTZt2lRLlSqV6YduWidPntSPPvpIq1atqq+88opPsaquAQeffPJJrVChgs/JIiUlRadOnapVqlTRmJiYDLezRGFyqkDatrjirx0ZTUA/aNAgcuXKRd++fX3e5+TJk5k/fz5jx471Ka5///7s3buXM2fOMHXqVEeXdu7YsYNHH32ULVu2ULJkSTp16sT/+3//j0KFCqW7/ZkzZ1iyZAnfffcd8+fPp2jRovTp0+eyObNfnn8IgClPNUx3H0lJSVd0Rjx//jxxcXGuObf9cPz4cfLly+fThE+pVJUTJ05QuHBhv8o+deqUz/N1p0qdgzyjWQkDmYA+UBm1bWOCIZC2fd33o1i2bBlff/013bp18ynu6NGjDB06lPj4eKZPn+4oSXz99df861//QkSoXLkyb775Ju3aeRs+yHWCtk2bNrRp0waAAwcOULx48TRbHfK6j/R6rOfLl8/vJAH4/SEPrktjA4mPiopi6dKlREREUKdOHa9T0aYVERHh15S5xlzPcsRVT4GYOHEi06ZNY+7cufhydDV48GDCw8MZPHgwLVq0cBTz8MMPs3fvXvbs2cO6desyTRLpuTJJXJ9q1KjBM888Q8GCBalbty7fffdddlfJmBwrRxxRxMXFcezYMcLCwvj9998pUaKE49jExETy5s3L888/77jz3LFjxxARdu7cSZEiRRyXdb13zkvPvn37eOuttyhdujTVqlWjWrVqVK5cOdMjtJtuuomFCxfStGlTNmzYwBdffEGlSpUoV65cFtXcmOtHjkgU4eHhDBkyBBG5bMRUJy5evMjgwYOpXLmy45jChQszaNAgX6uZo128eJHz589TsGBBnxJimTJl6NmzJ61bt+bYsWO0aNGCWbNmOfopr0iRIixatIilS5dy/Phx7rnnHh566CFeffVVbrrppkCejjHGQ4746alYsWJER0dz++23c/PNN/sU26RJE5555hmfYuzI4Eq5cuXik08+oWDBglSsWJHmzZuzb98+R7H169dn2bJlVKpUiRtuuIGaNWvyxRdfOOpoV6RIETp06EDPnj3ZtGkThQsXpk6dOgwaNMinOSuMMRnLEYkCuOyEry+eeOIJnwa0ux4sWrSIjz/+mBEjRjBmzBiWLFmSaYyI8MorrzBx4vAheiUAACAASURBVEQOHTrEjz/+yIsvvsjSpUsdnfupWrUqS5cu5euvvyYmJobvvvuOatWqMWrUKBITEx3VO3/+/PTr14/Y2Fj2799PjRo1GDdunKOxp4wxGcsxn5D+Jorr4eggOTmZAwcO8Ouvvzr60GzUqBFxcXE888wz9OjRg3HjxrFq1SpHH/ht2rRhxYoVTJ48mUceeYTXX3+d2267jeHDh3PmzBmvsbfccgvgmodj4sSJzJ49m+XLl1OlShU++eQTEhISHD3fm2++mY8//ph58+Yxe/Zs6tat6/PFCsYYD/52wMiuJaNOSSkpKT4NMXE18GfQuoSEBJ01a5aeOnXq0rqMOtzt27dP27Vrp7ly5VJAq1WrprNnz9b9+/c7eq2WL1+u0dHR+sEHH2ijRo20XLly2rt3b126dKkmJSU5rvOmTZv02Wef1eLFi+szzzyjGzdudByrqrpr1y7t2bOnlilTRj/88EM9d+6cT/E///yzNm7cWO+9916NjY31ui3W4c7kUIG07Wz/4Pd1yejN9Pvvv+uBAwf8egHPnDmjmzZt8iv2888/13nz5vkct3z5cm3evLm+9dZbevr0aa/bJiQk6LRp07RTp05asGBBzZMnj/7jH//Qjh076tSpU72OHpucnKwxMTFavXp1bdGihXbu3Flr1qypf/nLX/TRRx/NtJ7nzp27lFQOHjyoI0aM0BYtWmiJEiV09erVPj3n06dP66effqo1a9bUl156yadYVVfie/bZZ7VChQo+J4uUlBSdMWOGVqtWTb/++usMt7NEYXIqSxSq+t577+n777/v84u3ZcsWfeONN7R79+4+x65YsUIBrVSpkp48edJRTHJysr733nsaHh6ugD733HN64sQJrzEpKSm6ZcsW/c9//qOtW7fWQoUKaUxMjC5cuFD37t3raJjx5ORk3blz56X7CQkJumvXLkd1Ts+JEyd8HqQvVUpKSqbP2ZvMEqs3Fy9e9HokZ4nC5FSBtO0ccXlsIA4cOMCAAQOoXLkyBw8epFixYo5jBwwYQGRkJO3bt3ccM2PGDI4cOUL//v2JioqiXr163HjjjV5jRIQqVapQpUoVevfuzYULF0hKSiJ//vypzyLTcsPCwqhQocKl+7lz56Z8+fKO651WZnX2RkQCivdnvu1UuXLl8ntudWOuVyF9x4hIS+C/QDgwWlXfS/N4V2AIrqkmAT5W1dG+lrN+/XrmzJmDiNCyZUuqV6/uODb1EszevXv7lCSWL19OgQIF2LJli08fuA8++CAPPvig4+3Tkzt3bnLnzh3QPkzmAmm/ItIF6Ode/5aqfpEllTYmBEKWKEQkHPgEaIZrovqVIjJTr5wScoqqPhdIWZUrV2b16tWEh4f7PH5RYmIiLVu25Omnn/Yprlq1asTExPgUY0Jj7ty5zJw5k7/+9a/Ur1+fqlWrEh4eHtA+A2m/IlIYGABEAwqscscGPkerMdkglJfH1gd2qupuVU0EJgO+D27kQO7cuWnevDktW7b0ecC3ggULMmbMGJ8vk81otFfjvx9++IFZs2axe/dun2ala9WqFSVKlKB79+6XOusFQSDttwWwQFWPu5PDAqBlMCplTHYIZaIoAez3uB/nXpdWBxFZLyIxIlIqvR2JyJMiEisisUeOHEm3MH/7Udx111020F6QHTp0yHGfB0/16tXjk08+oUKFChQoUIAvv/zScWy/fv144403qFGjBq+//jpvv/02586d87kOHgJpv05jHbVtY7JbKBNFel/R0/Z4+hYoq6q3AQuBdL8KqupIVY1W1eiiRYumW9j9999Pq1atfK/kddDhLqsdOnSIKlWqcNNNN1GzZk0mTJjgKC5//vzMmDGDjh07ki9fPvr378/w4cMdJ53+/fvzzTffsHr1ao4ePUqNGjUYPXo0SUlJ/jyNQNqvk1jXSgdt25js5jVRiMgZETmdznJGRE5nsu84wPMIoSRpLs9R1WOqesF9dxRQz9cnkKpo0aIBzXFgrrRgwQIaNWpEw4YNueuuuxgzZoyjuNq1a/Prr79SvXp1tm/fzrvvvstHH33EyZMnM42NjIzkf//736XJpFavXk3VqlX573//y/nz5zONr1ChAkWKFGHo0KEsWrSIRYsWUbt2bb799lvX9eDOBdJ+M4015pri73W1mS24TpTvBsoBkcA6oHqabYp53H4QWJHZfq+2a80D7Q3uz/StycnJunz5cv3ll19UNeOe2akWLlyoXbt21aZNm2qlSpX0tddec1zvDRs2aJ06dTQsLExLly6tzz77rC5cuFATExMzjb1w4YKOGDFCt27dqr1799YSJUrok08+qWvXrnX2RN327t2rvXr10tKlS+vgwYO9Th2bnpUrV+o999yjjRs31hUrVnjdFve15oG0X6AwsAco5F72AIX1GmvbJmfhau1wB7QGtgO7gFfd694E2rpvvwtscr8JvweqZLbPjN5M+/fv17i4OL9ewMWLF+v69ev9ih07dqxOmzbN57j4+Hjt1auX1qxZ03EHsp9++kmfe+45LV68uAJ6991369dff51pokid17thw4aXhvK4+eab9aGHHnJU7oULF/Ttt9/Ww4cPX5qDu3jx4j73zD579qyOGjVKa9eurf/61798ilV1zdndu3dvLV++vF89s+fMmaM1a9bUr776KsPtPN9MgbRfoBuw0708oQ7eL5YoTChdtYkiFEt6b6ZTp07pO++8o4MHD75sDCSnihYtqkWLFtUlS5b4FJeQkKClS5fW/Pnz69atWx3Hbdu2TWvVqqWAhoWF6cqVKx3FnT17VmfPnq29e/fWKlWq6Isvvqj79u1z1DNb1fVhOW/ePN21a5cmJibq3r17Hdc5rdOnT+uFCxf8ik1JSfHr/5Tq7NmzfscmJSV57VEeyJsp0MUShQmlQNp2juiievDgQd58800AHnroIQoWLOhTfGJiIo0bN+auu+7yKW7MmDGULl2aqVOn+jTxUWJiIhMnTiQqKoqoqCiPHtbe5c+fn9atW9O6dWsAzp0754793Xugm4hcNm1rmTJlHNc5rUB6R4uIz/8jT05fr/SEh4cH3MfCmOtNjkgUlSpVomTJkkRERFw2TIVTUVFRjBo1yucroOrUqUOvXr18jqtRo4ZP22ckkA9MY4xxKkckChGhTZs2Pne2SzVs2LBLcyH4omHDhn6VZ4wx15IckSiAgBJF27Ztg1wbk10OHz5MkSJF7OclY4IoxySKRo0a2ZSmOURycjIHDx6kRIkSPv+sd+zYMe68805KlSpF/fr1admyJffcc0+IamrM9SHHfLJGRETYt8irzIkTJzh48KDPc1aHh4czd+5cChcuzO233063bt3YsWOHo9hq1arxzTffsHHjRgYPHszSpUsvjRBsjPFPjkkUJnR2797N5s2b2b59O3v27OHgwYOO4vLmzcu///1vcufOTcmSJencuTMXLlzIPBDo2bMno0ePZs2aNUyePJkZM2Zw9uxZR7E1atRg8eLF9OzZk927d3Pbbbcxffr01P4NxhgfWaLIZoF8292yZQt79uxxXM6SJUuYMGEC77zzDr169WLz5rQjZqcvLCyMZ599lsqVK1O+fHnefvttEhMTM43LkycPn3/+OUOGDOHgwYPMnz+fZ555hlWrVjkqt0OHDsyePZuhQ4eyf/9+qlWrxjvvvMPp05mNHgM1a9Zk+PDhjB8/nokTJ/Lpp5/SqFEjfvrpJ0dlG2M8+NsBI7uW9DolnTt3Tvfu3av79u3zuceuqurGjRt148aNPsepuuZxHjdunF+xP/74o959990+dT6Li4vTfv36adWqVRXQ8ePHO+5wt3LlSm3VqpXiGqBO27Vr57jc5ORk/e9//6tRUVHavn17LVasmK5atcpx/Hfffafbtm3TsWPHar169bRv376OYz3n7O7bt69fPbNVVefPn6916tTRKVOmZLgN1uHO5FCBtO1s/+D3dUnvzXTy5EktUKCAFixY0OdxgFRVe/TooeXLl/drHuennnpK69at63PsjBkztFGjRtqyZUufekinpKTojh079OOPP9Y2bdronDlzHCeKVD/99JM+8cQTun//fp/qrKq6detWvXjxop49e9bvntmq6tf/KdX58+f9jk1OTvZab0sUJqcKpG3niKueoqKiaNCgARERERQoUMDn+IsXL/Lhhx/6PI/zyZMnqVOnDsOGDfP50ty2bdv6dVmuiHDrrbdy66238uyzzwIwbsTPPu2jYcOGfvcBSe2BHui80/78n1LlzZvX79iwsDAiIyP9jjfmepQjEgUE1o+ic+fONGvWzOe4G2+8kaeeesqvMo0x5lqRoxKFv99y/UkSxhhzvcgxiaJ8+fLZXQVjjMmR7PJYY4wxXlmiMDnWL7/8wtSpU9m/f7/rEj8fiUhLEdkmIjtF5OV0Hu8jIptFZL2ILBKRMh6PJYvIWvcyM8CnYky2skRhQi4lJYUtW7Zw8uRJnz+w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\n",
+      "text/plain": [
+       "<Figure size 432x288 with 4 Axes>"
+      ]
+     },
+     "metadata": {
+      "needs_background": "light"
+     },
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "# Copy and past the velocities grid and null cline code here, and use it to write a for loop of different\n",
+    "# beta values you will use to create different flows that you will plot with the quiver function.\n",
+    "\n",
+    "fig, ax = plt.subplots(2,2)\n",
+    "q = ax[0,0].quiver(S , I , dS, dI)\n",
+    "\n",
+    "# Flow diagram\n",
+    "ax[0,0].quiverkey(q, X=0.3, Y=1.1, U=1,label='Quiver key, length = 1/day', labelpos='E')\n",
+    "\n",
+    "# Null Cline\n",
+    "ax[0,0].plot([Sn, Sn], [0,S0])\n",
+    "ax[0,0].set_xlabel('S')\n",
+    "ax[0,0].set_ylabel('I')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The flow diagrams are great because they give you a feel for how the variables will flow in time, but often you want to predict what their values will actually be over time, i.e. we want to know I(t), not dI/dt. To do this, we'll use one of scipy's (many) ODE solvers. The basis for this solver is Euler's Method discussed in class.\n",
+    "\n",
+    "I provide some example code below for how to use the ODE solver. The example I give is starting with the initial conditions from above on day t=0, and then predicting the progression of the disease after 52 days.\n",
+    "\n",
+    "What I want you to do:\n",
+    "\n",
+    "I want you to predict what would happen if you intervened on day t=12 with the shelter in place order. Assume this decreases the number of susceptible people (S) by 42%. How does the disease progress after this? Plot the S, I, D, & R over time for both no-intervention, and with intervention. Also plot the cumulative populations for each.\n",
+    "\n",
+    "# Student Input Cell"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Without Intervention\n",
+    "sol_no_int = solve_ivp(SIR, [0,51],[S0,I0,0,0],max_step = 1)\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Problem 3: PCA & tSNE\n",
+    "\n",
+    "For this problem, you will simply be plotting a dataset of three clusters with PCA and tSNE.\n",
+    "\n",
+    "Functions you will need:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 30,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from mpl_toolkits.mplot3d import Axes3D\n",
+    "from sklearn.manifold import TSNE\n",
+    "from sklearn.decomposition import PCA"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#-----------#\n",
+    "# EMBEDDING #\n",
+    "#-----------#\n",
+    "\n",
+    "# Raw Data\n",
+    "\n",
+    "data = np.loadtxt('Embed_input.txt',delimiter='\\t')\n",
+    "\n",
+    "fig = plt.figure()\n",
+    "ax = fig.add_subplot(111, projection='3d')\n",
+    "ax.scatter(data[:1000,0], data[:1000,1], data[:1000,2])\n",
+    "ax.scatter(data[1000:2000,0], data[1000:2000,1], data[1000:2000,2])\n",
+    "ax.scatter(data[2000:,0], data[2000:,1], data[2000:,2])\n",
+    "plt.title('Raw Data')\n",
+    "\n",
+    "# PCA\n",
+    "\n",
+    "pca = PCA(n_components=2)\n",
+    "pca.fit(data)\n",
+    "pca_embedded = pca.transform(data)\n",
+    "\n",
+    "fig = plt.figure()\n",
+    "plt.xlabel('Component 1')\n",
+    "plt.ylabel('Component 2')\n",
+    "plt.title('PCA Embedding')\n",
+    "\n",
+    "\n",
+    "sns.scatterplot(x=pca_embedded[:1000, 0], y=pca_embedded[:1000, 1])\n",
+    "sns.scatterplot(x=pca_embedded[1000:2000, 0], y=pca_embedded[1000:2000, 1])\n",
+    "sns.scatterplot(x=pca_embedded[2000:, 0], y=pca_embedded[2000:, 1])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "As you can see from the plots, the three clusters are distinct, but not spherical. PCA has a tough time with them. In the code below, I use tSNE with perplexity set to 30.\n",
+    "\n",
+    "Modify the code to show what the embedding looks like when you set the perplexity to 2, 30, 50, or 100.\n",
+    "\n",
+    "NOTE: The tSNE function takes some time to run. Depending on your processor speed, it might take a couple of minutes.\n",
+    "\n",
+    "\n",
+    "# Student Input Cell"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# TSNE\n",
+    "\n",
+    "f, axes = plt.subplots(2, 2)\n",
+    "f.suptitle('tSNE')\n",
+    "\n",
+    "tsne_embedded = TSNE(n_components=2,perplexity=30).fit_transform(data)\n",
+    "sns.scatterplot(x=tsne_embedded[:1000, 0], y=tsne_embedded[:1000, 1],ax = axes[0,0])\n",
+    "sns.scatterplot(x=tsne_embedded[1000:2000, 0], y=tsne_embedded[1000:2000, 1],ax = axes[0,0])\n",
+    "sns.scatterplot(x=tsne_embedded[2000:, 0], y=tsne_embedded[2000:, 1],ax = axes[0,0])\n",
+    "    "
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.6.10"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}
